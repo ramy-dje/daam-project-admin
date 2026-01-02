@@ -16,9 +16,9 @@ import {
 } from "@/components/ui/dialog"
 import { DataTable } from "@/components/data-table"
 import type { Client } from "@/lib/types"
-import { usersApi } from "@/lib/api"
+import { usersApi, authApi, SignupRequest } from "@/lib/api"
 import { useAuth } from "@/hooks/use-auth"
-import { Loader2 } from "lucide-react"
+import { Loader2, Plus } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useToast } from "@/hooks/use-toast"
 
@@ -26,7 +26,17 @@ export default function ClientsPage() {
   const [clients, setClients] = useState<Client[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [viewingClient, setViewingClient] = useState<Client | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [formData, setFormData] = useState<SignupRequest>({
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+    birthDate: "",
+    phoneNumber: "",
+  })
   
   const { user } = useAuth()
   const { toast } = useToast()
@@ -69,9 +79,44 @@ export default function ClientsPage() {
     })
   }
 
+  const handleCreateClient = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsSubmitting(true)
+
+    try {
+      await authApi.clientSignup(formData)
+      toast({
+        title: "Success",
+        description: "Client created successfully",
+      })
+      await fetchClients()
+      handleCloseCreateDialog()
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.response?.data || "Failed to create client",
+        variant: "destructive",
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
   const handleCloseDialog = () => {
     setIsDialogOpen(false)
     setViewingClient(null)
+  }
+
+  const handleCloseCreateDialog = () => {
+    setIsCreateDialogOpen(false)
+    setFormData({
+      firstName: "",
+      lastName: "",
+      email: "",
+      password: "",
+      birthDate: "",
+      phoneNumber: "",
+    })
   }
 
   const columns = [
@@ -98,6 +143,10 @@ export default function ClientsPage() {
               <CardTitle className="text-2xl">Clients Management</CardTitle>
               <CardDescription>View client accounts and information</CardDescription>
             </div>
+            <Button onClick={() => setIsCreateDialogOpen(true)} className="bg-primary hover:bg-primary/90">
+              <Plus className="w-4 h-4 mr-2" />
+              Create Client
+            </Button>
           </div>
         </CardHeader>
         <CardContent>
@@ -148,6 +197,93 @@ export default function ClientsPage() {
           <DialogFooter>
             <Button onClick={handleCloseDialog}>Close</Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Client Dialog */}
+      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Create New Client</DialogTitle>
+            <DialogDescription>Add a new client account</DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleCreateClient}>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="firstName">First Name *</Label>
+                  <Input
+                    id="firstName"
+                    value={formData.firstName}
+                    onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="lastName">Last Name *</Label>
+                  <Input
+                    id="lastName"
+                    value={formData.lastName}
+                    onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                    required
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="email">Email *</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password">Password *</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="phoneNumber">Phone Number</Label>
+                <Input
+                  id="phoneNumber"
+                  type="tel"
+                  value={formData.phoneNumber}
+                  onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="birthDate">Birth Date</Label>
+                <Input
+                  id="birthDate"
+                  type="date"
+                  value={formData.birthDate}
+                  onChange={(e) => setFormData({ ...formData, birthDate: e.target.value })}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={handleCloseCreateDialog}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  "Create Client"
+                )}
+              </Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
     </div>
