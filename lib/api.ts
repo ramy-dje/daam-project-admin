@@ -123,6 +123,14 @@ export const usersApi = {
     const response = await api.post('/users/sellers', request, { params: { adminId } });
     return response.data;
   },
+  
+  deleteSeller: async (sellerId: number, adminId: number): Promise<void> => {
+    await api.delete(`/users/sellers/${sellerId}`, { params: { adminId } });
+  },
+  
+  deleteClient: async (clientId: number, adminId: number): Promise<void> => {
+    await api.delete(`/users/clients/${clientId}`, { params: { adminId } });
+  },
 };
 
 // Products API

@@ -72,11 +72,28 @@ export default function ClientsPage() {
   }
 
   const handleDelete = (client: Client) => {
-    // Backend doesn't support delete clients yet
-    toast({
-      title: "Info",
-      description: "Delete functionality not yet implemented in backend",
-    })
+    if (!user?.id) return
+    
+    if (!window.confirm(`Are you sure you want to delete ${client.firstName} ${client.lastName}?`)) {
+      return
+    }
+    
+    usersApi.deleteClient(client.id, user.id)
+      .then(() => {
+        toast({
+          title: "Success",
+          description: "Client deleted successfully",
+        })
+        fetchClients()
+      })
+      .catch((error: any) => {
+        const errorMessage = error.response?.data?.message || error.response?.data || error.message || "Failed to delete client"
+        toast({
+          title: "Error",
+          description: typeof errorMessage === 'string' ? errorMessage : "Failed to delete client",
+          variant: "destructive",
+        })
+      })
   }
 
   const handleCreateClient = async (e: React.FormEvent) => {

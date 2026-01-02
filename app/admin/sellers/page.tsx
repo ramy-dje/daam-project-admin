@@ -121,11 +121,28 @@ export default function SellersPage() {
   }
 
   const handleDelete = (seller: Seller) => {
-    // Backend doesn't support delete sellers yet
-    toast({
-      title: "Info",
-      description: "Delete functionality not yet implemented in backend",
-    })
+    if (!user?.id) return
+    
+    if (!window.confirm(`Are you sure you want to delete ${seller.firstName} ${seller.lastName}?`)) {
+      return
+    }
+    
+    usersApi.deleteSeller(seller.id, user.id)
+      .then(() => {
+        toast({
+          title: "Success",
+          description: "Seller deleted successfully",
+        })
+        fetchSellers()
+      })
+      .catch((error: any) => {
+        const errorMessage = error.response?.data?.message || error.response?.data || error.message || "Failed to delete seller"
+        toast({
+          title: "Error",
+          description: typeof errorMessage === 'string' ? errorMessage : "Failed to delete seller",
+          variant: "destructive",
+        })
+      })
   }
 
   const handleCloseDialog = () => {
