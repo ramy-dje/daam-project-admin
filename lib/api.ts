@@ -41,6 +41,7 @@ export interface ProductResponse {
   name: string;
   description: string | null;
   image: string | null;
+  price: number | null;
   isValid: boolean;
   locationName: string | null;
   latitude: number | null;
@@ -77,6 +78,7 @@ export interface ProductRequest {
   name: string;
   description?: string;
   image?: string;
+  price?: number;
   isValid?: boolean;
   locationName?: string;
   latitude?: number;

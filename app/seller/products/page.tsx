@@ -30,6 +30,7 @@ interface ProductFormData {
   description: string
   image: string
   imageFile: File | null
+  price: string
   locationName: string
   latitude: string
   longitude: string
@@ -51,6 +52,7 @@ export default function SellerProductsPage() {
     description: "",
     image: "",
     imageFile: null,
+    price: "",
     locationName: "",
     latitude: "",
     longitude: "",
@@ -111,6 +113,7 @@ export default function SellerProductsPage() {
         name: formData.name,
         description: formData.description || undefined,
         image: imagePath || undefined,
+        price: formData.price ? parseFloat(formData.price) : undefined,
         locationName: formData.locationName || undefined,
         latitude: formData.latitude ? parseFloat(formData.latitude) : undefined,
         longitude: formData.longitude ? parseFloat(formData.longitude) : undefined,
@@ -155,6 +158,7 @@ export default function SellerProductsPage() {
       description: product.description || "",
       image: product.image || "",
       imageFile: null,
+      price: product.price?.toString() || "",
       locationName: product.locationName || "",
       latitude: product.latitude?.toString() || "",
       longitude: product.longitude?.toString() || "",
@@ -235,6 +239,7 @@ export default function SellerProductsPage() {
       description: "",
       image: "",
       imageFile: null,
+      price: "",
       locationName: "",
       latitude: "",
       longitude: "",
@@ -256,6 +261,10 @@ export default function SellerProductsPage() {
   const columns = [
     { header: "Product Name", accessor: "name" as keyof Product },
     { header: "Serial Number", accessor: "serialNumber" as keyof Product },
+    { 
+      header: "Price", 
+      accessor: ((product: Product) => product.price ? `$${product.price.toFixed(2)}` : 'N/A') as any,
+    },
     { header: "Location", accessor: "locationName" as keyof Product },
     {
       header: "Status",
@@ -338,6 +347,18 @@ export default function SellerProductsPage() {
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   placeholder="Describe your product"
                   rows={3}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="price">Price ($)</Label>
+                <Input
+                  id="price"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={formData.price}
+                  onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                  placeholder="0.00"
                 />
               </div>
               <div className="space-y-2">
